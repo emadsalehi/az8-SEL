@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -21,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import usermanagement.entity.Person;
-import usermanagement.exception.UserNotFoundException;
 import usermanagement.repository.PersonRepository;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -50,15 +48,15 @@ public class MockUserServiceImplTest {
 		assertEquals(ALI, user.getFirstName());
 	}
 
-	@Test 
+	@Test
 	public void findById_not_found_default_user() {
 		doReturn(null).when(personDao).findOne( Matchers.any(Integer.class));
-		 
+
 		doReturn(user).when(transformer).toUserDomain(Matchers.any(Person.class));
-		
+
 		User default_user = testClass.findById(Integer.valueOf(1));
 		assertNotNull(default_user);
-		 
+
 	}
 
 	@Test
@@ -81,6 +79,28 @@ public class MockUserServiceImplTest {
 
 		List<User> users = testClass.searchByCompanyName(TEST_COMPANY);
 		assertTrue(users.isEmpty());
+	}
+
+	@Test
+	public void saveTest() {
+		User user = new User();
+		user.setUserId(10);
+		user.setCompanyName("company");
+		user.setFirstName("fName");
+		user.setLastName("lName");
+		Person person = new Person();
+		person.setPersonId(10);
+		person.setCompanyName("company");
+		person.setfName("fName");
+		person.setlName("lName");
+		doReturn(person).when(transformer).toUserEntity(user);
+		doReturn(user).when(transformer).toUserDomain(person);
+		doReturn(person).when(personDao).save(person);
+		User user1 = testClass.save(user);
+		assertEquals(10, user1.getUserId().intValue());
+		assertEquals("company", user1.getCompanyName());
+		assertEquals("fName", user1.getFirstName());
+		assertEquals("lName", user1.getLastName());
 	}
 
 	@Test
